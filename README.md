@@ -11,6 +11,39 @@ La aplicación permite a los postulantes practicar y evaluar sus conocimientos a
 - **Mi Historial de Simulacros**: Consulta los resultados de simulacros anteriores, incluyendo puntaje, aprobación y detalle de cada intento.
 - **Autenticación**: Registro e inicio de sesión de usuarios para guardar su progreso y resultados.
 
+## 📷 Capturas de pantalla
+
+### Autenticación
+
+| Iniciar Sesión | Registro |
+|:---:|:---:|
+| ![Pantalla de inicio de sesión](img/img1.jpeg) | ![Pantalla de registro](img/img2.jpeg) |
+
+### Menú principal
+
+| Menú Principal |
+|:---:|
+| ![Menú principal](img/img3.jpeg) |
+
+### Ver Preguntas
+
+| Banco de preguntas |
+|:---:|
+| ![Ver preguntas](img/img4.jpeg) |
+
+### Simulacro
+
+| Simulacro del examen |
+|:---:|
+| ![Simulacro](img/img8.jpeg) |
+
+### Historial de Simulacros
+
+| Mi Historial | Detalle del Intento |
+|:---:|:---:|
+| ![Historial de simulacros](img/img5.jpeg) | ![Detalle del intento](img/img6.jpeg) |
+| ![Detalle de respuestas](img/img7.jpeg) | |
+
 ## 🛠️ Recursos utilizados
 
 ### Tecnologías y dependencias
