@@ -6,6 +6,7 @@ import 'providers/auth_provider.dart';
 import 'screens/home_screen.dart';
 import 'screens/login_screen.dart';
 import 'services/session_manager.dart';
+import 'theme/app_theme.dart';
 
 Future<void> main() async {
   await dotenv.load();
@@ -20,10 +21,7 @@ class MyApp extends ConsumerWidget {
     return MaterialApp(
       title: 'Simulacro MTC',
       navigatorKey: SessionManager.navigatorKey,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
-        useMaterial3: true,
-      ),
+      theme: AppTheme.light,
       home: const AuthGate(),
     );
   }

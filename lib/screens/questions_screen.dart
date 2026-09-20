@@ -3,6 +3,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../models/question.dart';
 import '../providers/question_provider.dart';
+import '../theme/app_theme.dart';
+import '../widgets/buttons/secondary_button.dart';
+import '../widgets/cards/app_card.dart';
+import '../widgets/cards/status_badge.dart';
+import '../widgets/states/custom_empty_state.dart';
+import '../widgets/states/custom_error_state.dart';
+import '../widgets/states/custom_loading_state.dart';
 
 class QuestionsScreen extends ConsumerStatefulWidget {
   const QuestionsScreen({super.key});
@@ -31,17 +38,25 @@ class _QuestionsScreenState extends ConsumerState<QuestionsScreen> {
       appBar: AppBar(title: const Text('Ver Preguntas')),
       body: Column(
         children: [
-          Padding(
-            padding: const EdgeInsets.all(16),
+          Container(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.lg,
+              vertical: AppSpacing.md,
+            ),
+            decoration: const BoxDecoration(
+              color: AppColors.surface,
+              border: Border(bottom: BorderSide(color: AppColors.border)),
+            ),
             child: Row(
               children: [
                 const Text(
                   'Mostrar:',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: AppSpacing.md),
                 DropdownButton<int>(
                   value: notifier.limit,
+                  underline: const SizedBox.shrink(),
                   items: _limitOptions
                       .map(
                         (limit) => DropdownMenuItem(
@@ -57,57 +72,33 @@ class _QuestionsScreenState extends ConsumerState<QuestionsScreen> {
                   },
                 ),
                 const Spacer(),
-                Text(
-                  'Página ${notifier.currentPage} de ${notifier.totalPages}',
-                  style: const TextStyle(fontSize: 14, color: Colors.grey),
+                StatusBadge(
+                  label: 'Pág. ${notifier.currentPage}/${notifier.totalPages}',
+                  type: StatusBadgeType.info,
                 ),
               ],
             ),
           ),
-          const Divider(height: 1),
           Expanded(
             child: questionsState.when(
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (error, stackTrace) => Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(24),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(
-                        Icons.error_outline,
-                        size: 64,
-                        color: Colors.red,
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        'Error: $error',
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(fontSize: 16),
-                      ),
-                      const SizedBox(height: 16),
-                      ElevatedButton(
-                        onPressed: () => notifier.loadQuestions(),
-                        child: const Text('Reintentar'),
-                      ),
-                    ],
-                  ),
-                ),
+              loading: () => const CustomLoadingState(),
+              error: (error, stackTrace) => CustomErrorState(
+                message: 'Error: $error',
+                onRetry: () => notifier.loadQuestions(),
               ),
               data: (questions) {
                 if (questions.isEmpty) {
-                  return const Center(
-                    child: Text(
-                      'No hay preguntas disponibles',
-                      style: TextStyle(fontSize: 16, color: Colors.grey),
-                    ),
+                  return const CustomEmptyState(
+                    icon: Icons.quiz_outlined,
+                    title: 'No hay preguntas disponibles',
                   );
                 }
 
                 return ListView.separated(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(AppSpacing.lg),
                   itemCount: questions.length,
-                  separatorBuilder: (_, _) => const SizedBox(height: 12),
+                  separatorBuilder: (_, _) =>
+                      const SizedBox(height: AppSpacing.md),
                   itemBuilder: (context, index) {
                     final question = questions[index];
                     return _QuestionCard(question: question);
@@ -118,16 +109,16 @@ class _QuestionsScreenState extends ConsumerState<QuestionsScreen> {
           ),
           const Divider(height: 1),
           Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(AppSpacing.lg),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                FilledButton.tonalIcon(
+                SecondaryButton(
+                  label: 'Anterior',
+                  icon: Icons.chevron_left,
                   onPressed: notifier.currentPage > 1
                       ? () => notifier.previousPage()
                       : null,
-                  icon: const Icon(Icons.chevron_left),
-                  label: const Text('Anterior'),
                 ),
                 Text(
                   '${notifier.currentPage} / ${notifier.totalPages}',
@@ -136,13 +127,13 @@ class _QuestionsScreenState extends ConsumerState<QuestionsScreen> {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                FilledButton.tonalIcon(
+                SecondaryButton(
+                  label: 'Siguiente',
+                  icon: Icons.chevron_right,
+                  iconAlignment: IconAlignment.end,
                   onPressed: notifier.currentPage < notifier.totalPages
                       ? () => notifier.nextPage()
                       : null,
-                  icon: const Icon(Icons.chevron_right),
-                  label: const Text('Siguiente'),
-                  iconAlignment: IconAlignment.end,
                 ),
               ],
             ),
@@ -160,84 +151,65 @@ class _QuestionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.blue.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text(
-                    'Pregunta ${question.number}',
-                    style: const TextStyle(
-                      color: Colors.blue,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 14,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.green.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text(
-                    question.licenseCategory,
-                    style: const TextStyle(
-                      color: Colors.green,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 12,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Text(
-              question.question,
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                height: 1.4,
+    return AppCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              StatusBadge(
+                label: 'Pregunta ${question.number}',
+                type: StatusBadgeType.info,
               ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              question.topic,
-              style: const TextStyle(fontSize: 13, color: Colors.grey),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              question.subject,
-              style: const TextStyle(
-                fontSize: 12,
-                color: Colors.blueGrey,
-                fontWeight: FontWeight.w500,
+              const SizedBox(width: AppSpacing.sm),
+              StatusBadge(
+                label: question.licenseCategory,
+                type: StatusBadgeType.success,
               ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.md),
+          Text(
+            question.question,
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              height: 1.4,
             ),
-            const SizedBox(height: 12),
-            const Divider(height: 1),
-            const SizedBox(height: 12),
-            ...question.options.map(
-              (option) => Padding(
-                padding: const EdgeInsets.only(bottom: 8),
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          Text(
+            question.topic,
+            style: const TextStyle(fontSize: 13, color: AppColors.textMuted),
+          ),
+          const SizedBox(height: AppSpacing.md),
+          Text(
+            question.subject,
+            style: const TextStyle(
+              fontSize: 12,
+              color: AppColors.primary,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.md),
+          const Divider(height: 1),
+          const SizedBox(height: AppSpacing.md),
+          ...question.options.map(
+            (option) => Padding(
+              padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+              child: Container(
+                padding: const EdgeInsets.all(AppSpacing.sm),
+                decoration: BoxDecoration(
+                  color: option.isCorrect
+                      ? AppColors.successSoftBg
+                      : Colors.transparent,
+                  borderRadius: BorderRadius.circular(AppRadius.sm),
+                  border: option.isCorrect
+                      ? Border.all(
+                          color: AppColors.success.withValues(alpha: 0.4),
+                        )
+                      : null,
+                ),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -248,8 +220,8 @@ class _QuestionCard extends StatelessWidget {
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         color: option.isCorrect
-                            ? Colors.green.withValues(alpha: 0.2)
-                            : Colors.grey.withValues(alpha: 0.1),
+                            ? AppColors.success.withValues(alpha: 0.2)
+                            : AppColors.border.withValues(alpha: 0.6),
                       ),
                       child: Text(
                         option.optionNumber.toString(),
@@ -257,12 +229,12 @@ class _QuestionCard extends StatelessWidget {
                           fontSize: 13,
                           fontWeight: FontWeight.bold,
                           color: option.isCorrect
-                              ? Colors.green
-                              : Colors.grey.shade700,
+                              ? AppColors.success
+                              : AppColors.textMuted,
                         ),
                       ),
                     ),
-                    const SizedBox(width: 12),
+                    const SizedBox(width: AppSpacing.md),
                     Expanded(
                       child: Text(
                         option.optionText,
@@ -270,7 +242,7 @@ class _QuestionCard extends StatelessWidget {
                           fontSize: 14,
                           height: 1.3,
                           color: option.isCorrect
-                              ? Colors.green.shade800
+                              ? const Color(0xFF1E6B3A)
                               : Colors.black87,
                           fontWeight: option.isCorrect
                               ? FontWeight.w600
@@ -281,15 +253,15 @@ class _QuestionCard extends StatelessWidget {
                     if (option.isCorrect)
                       const Icon(
                         Icons.check_circle,
-                        color: Colors.green,
+                        color: AppColors.success,
                         size: 20,
                       ),
                   ],
                 ),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
