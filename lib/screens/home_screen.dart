@@ -5,6 +5,7 @@ import '../providers/auth_provider.dart';
 import '../theme/app_theme.dart';
 import '../widgets/buttons/primary_button.dart';
 import '../widgets/buttons/secondary_button.dart';
+import '../widgets/cards/recommendation_home_card.dart';
 import 'history_screen.dart';
 import 'login_screen.dart';
 import 'questions_screen.dart';
@@ -112,6 +113,8 @@ class HomeScreen extends ConsumerWidget {
                   ],
                 ),
                 const SizedBox(height: AppSpacing.xxl),
+                const RecommendationHomeCard(),
+                const SizedBox(height: AppSpacing.lg),
                 _MenuCard(
                   icon: Icons.quiz,
                   title: 'Ver Preguntas',

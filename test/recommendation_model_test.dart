@@ -9,20 +9,27 @@ void main() {
         'id': 24,
         'title': 'Límite de velocidad en carreteras para automóviles',
         'category': 'Límites de Velocidad',
-        'content': 'En carreteras fuera de zonas urbanas, el límite máximo de velocidad para automóviles es de 100 km/h.',
+        'content':
+            'En carreteras fuera de zonas urbanas, el límite máximo de velocidad para automóviles es de 100 km/h.',
         'image_url': '/uploads/recommendations/velocidad_carretera.webp',
         'is_active': true,
         'created_at': '2026-09-20T16:46:22.000Z',
       });
 
       expect(recommendation.id, 24);
-      expect(recommendation.title,
-          'Límite de velocidad en carreteras para automóviles');
+      expect(
+        recommendation.title,
+        'Límite de velocidad en carreteras para automóviles',
+      );
       expect(recommendation.category, 'Límites de Velocidad');
-      expect(recommendation.content,
-          'En carreteras fuera de zonas urbanas, el límite máximo de velocidad para automóviles es de 100 km/h.');
-      expect(recommendation.imageUrl,
-          '/uploads/recommendations/velocidad_carretera.webp');
+      expect(
+        recommendation.content,
+        'En carreteras fuera de zonas urbanas, el límite máximo de velocidad para automóviles es de 100 km/h.',
+      );
+      expect(
+        recommendation.imageUrl,
+        '/uploads/recommendations/velocidad_carretera.webp',
+      );
       expect(recommendation.isActive, isTrue);
       expect(recommendation.createdAt, isA<DateTime>());
     });
