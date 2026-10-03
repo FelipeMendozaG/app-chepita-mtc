@@ -1,0 +1,17 @@
+.dart_tool/
+.fvm/
+build/
+.pub-cache/
+.pub/
+**/*.g.dart
+**/*.freezed.dart
+**/*.template.dart
+android/.gradle/
+ios/Pods/
+ios/DerivedData/
+coverage/
+.idea/
+.vscode/
+*.iml
+.env
+**/.env

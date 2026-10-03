@@ -129,3 +129,19 @@ flutter run
 
 ```bash
 flutter analyze
+```
+
+## Architecture & Data Flow for AI
+
+La aplicación carga la configuración desde `.env` al iniciar y crea el árbol de widgets dentro de `ProviderScope`. Las pantallas y widgets consumen providers de Riverpod; estos coordinan los services, que realizan solicitudes REST con `http` o persisten la sesión con `shared_preferences`. Los services convierten las respuestas JSON en modelos, que regresan a los providers para actualizar la interfaz. La navegación usa `Navigator` de Flutter.
+
+```mermaid
+flowchart LR
+   UI["Presentación<br/>screens y widgets"] --> State["Estado<br/>Riverpod providers"]
+   State --> Services["Services<br/>API y persistencia"]
+   Services -->|HTTP| API["API REST"]
+   Services -->|sesión| Storage["shared_preferences"]
+   API -->|JSON| Services
+   Services --> Models["Models<br/>datos tipados"]
+   Models --> State
+```
