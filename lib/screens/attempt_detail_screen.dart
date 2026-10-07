@@ -9,17 +9,28 @@ import '../widgets/cards/app_card.dart';
 import '../widgets/cards/question_explanation_tile.dart';
 import '../widgets/cards/question_image_widget.dart';
 import '../widgets/cards/status_badge.dart';
+import '../widgets/states/custom_empty_state.dart';
 import '../widgets/states/custom_error_state.dart';
 import '../widgets/states/custom_loading_state.dart';
 
-class AttemptDetailScreen extends ConsumerWidget {
+enum AnswerFilter { all, incorrect, correct }
+
+class AttemptDetailScreen extends ConsumerStatefulWidget {
   final int attemptId;
 
   const AttemptDetailScreen({super.key, required this.attemptId});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final detailAsync = ref.watch(attemptDetailProvider(attemptId));
+  ConsumerState<AttemptDetailScreen> createState() =>
+      _AttemptDetailScreenState();
+}
+
+class _AttemptDetailScreenState extends ConsumerState<AttemptDetailScreen> {
+  AnswerFilter _selectedFilter = AnswerFilter.all;
+
+  @override
+  Widget build(BuildContext context) {
+    final detailAsync = ref.watch(attemptDetailProvider(widget.attemptId));
 
     return Scaffold(
       appBar: AppBar(title: const Text('Detalle del Intento')),
@@ -27,9 +38,23 @@ class AttemptDetailScreen extends ConsumerWidget {
         loading: () => const CustomLoadingState(),
         error: (error, stackTrace) => CustomErrorState(
           message: 'Error: $error',
-          onRetry: () => ref.invalidate(attemptDetailProvider(attemptId)),
+          onRetry: () => ref.invalidate(attemptDetailProvider(widget.attemptId)),
         ),
         data: (attempt) {
+          final wrongCount = attempt.answers.where((a) => !a.isCorrect).length;
+          final correctCount = attempt.answers.where((a) => a.isCorrect).length;
+
+          final filteredAnswers = attempt.answers.where((a) {
+            switch (_selectedFilter) {
+              case AnswerFilter.incorrect:
+                return !a.isCorrect;
+              case AnswerFilter.correct:
+                return a.isCorrect;
+              case AnswerFilter.all:
+                return true;
+            }
+          }).toList();
+
           return SingleChildScrollView(
             padding: const EdgeInsets.all(AppSpacing.lg),
             child: Column(
@@ -37,11 +62,66 @@ class AttemptDetailScreen extends ConsumerWidget {
               children: [
                 _SummaryCard(attempt: attempt),
                 const SizedBox(height: AppSpacing.xl),
-                const Text(
-                  'Detalle de respuestas',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      'Detalle de respuestas',
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                    Text(
+                      '${filteredAnswers.length} de ${attempt.answers.length}',
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.textMuted,
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: AppSpacing.md),
+                const SizedBox(height: AppSpacing.sm),
+                // Filtro por estado de respuesta
+                if (attempt.answers.isNotEmpty) ...[
+                  SizedBox(
+                    width: double.infinity,
+                    child: SegmentedButton<AnswerFilter>(
+                      showSelectedIcon: false,
+                      segments: [
+                        ButtonSegment(
+                          value: AnswerFilter.all,
+                          label: Text('Todas (${attempt.answers.length})'),
+                        ),
+                        ButtonSegment(
+                          value: AnswerFilter.incorrect,
+                          label: Text(
+                            'Incorrectas ($wrongCount)',
+                            style: TextStyle(
+                              color: wrongCount > 0 ? AppColors.danger : null,
+                              fontWeight: wrongCount > 0 ? FontWeight.bold : null,
+                            ),
+                          ),
+                        ),
+                        ButtonSegment(
+                          value: AnswerFilter.correct,
+                          label: Text(
+                            'Correctas ($correctCount)',
+                            style: TextStyle(
+                              color: correctCount > 0 ? AppColors.success : null,
+                              fontWeight: correctCount > 0 ? FontWeight.bold : null,
+                            ),
+                          ),
+                        ),
+                      ],
+                      selected: {_selectedFilter},
+                      onSelectionChanged: (newSelection) {
+                        setState(() {
+                          _selectedFilter = newSelection.first;
+                        });
+                      },
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.md),
+                ],
                 if (attempt.answers.isEmpty)
                   const Center(
                     child: Padding(
@@ -56,12 +136,23 @@ class AttemptDetailScreen extends ConsumerWidget {
                       ),
                     ),
                   )
+                else if (filteredAnswers.isEmpty)
+                  CustomEmptyState(
+                    icon: _selectedFilter == AnswerFilter.incorrect
+                        ? Icons.celebration_outlined
+                        : Icons.quiz_outlined,
+                    title: _selectedFilter == AnswerFilter.incorrect
+                        ? '¡Sin errores en este intento!'
+                        : 'No hay respuestas para este filtro',
+                    subtitle: _selectedFilter == AnswerFilter.incorrect
+                        ? 'Acertaste todas las preguntas registradas.'
+                        : 'Selecciona otra categoría para visualizar las preguntas.',
+                  )
                 else
-                  ...attempt.answers.asMap().entries.map((entry) {
-                    final index = entry.key;
-                    final answer = entry.value;
+                  ...filteredAnswers.map((answer) {
+                    final originalIndex = attempt.answers.indexOf(answer);
                     return _QuestionDetailCard(
-                      number: index + 1,
+                      number: originalIndex + 1,
                       answer: answer,
                     );
                   }),
@@ -102,6 +193,25 @@ class _SummaryCard extends StatelessWidget {
                 type: approved
                     ? StatusBadgeType.success
                     : StatusBadgeType.danger,
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Row(
+            children: [
+              Icon(
+                approved ? Icons.verified_outlined : Icons.info_outline,
+                size: 14,
+                color: approved ? AppColors.success : AppColors.danger,
+              ),
+              const SizedBox(width: 4),
+              Text(
+                'Nota mínima MTC: 35 de 40 preguntas',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                  color: approved ? AppColors.success : AppColors.danger,
+                ),
               ),
             ],
           ),

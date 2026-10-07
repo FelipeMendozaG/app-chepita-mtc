@@ -12,11 +12,20 @@ import '../widgets/states/custom_error_state.dart';
 import '../widgets/states/custom_loading_state.dart';
 import 'attempt_detail_screen.dart';
 
-class HistoryScreen extends ConsumerWidget {
+enum HistoryFilter { all, approved, failed }
+
+class HistoryScreen extends ConsumerStatefulWidget {
   const HistoryScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<HistoryScreen> createState() => _HistoryScreenState();
+}
+
+class _HistoryScreenState extends ConsumerState<HistoryScreen> {
+  HistoryFilter _selectedFilter = HistoryFilter.all;
+
+  @override
+  Widget build(BuildContext context) {
     final attemptsAsync = ref.watch(attemptsProvider);
 
     return Scaffold(
@@ -36,33 +45,227 @@ class HistoryScreen extends ConsumerWidget {
             );
           }
 
+          final approvedCount = attempts.where((a) => a.approved).length;
+          final failedCount = attempts.where((a) => !a.approved).length;
+
+          final filteredAttempts = attempts.where((attempt) {
+            switch (_selectedFilter) {
+              case HistoryFilter.approved:
+                return attempt.approved;
+              case HistoryFilter.failed:
+                return !attempt.approved;
+              case HistoryFilter.all:
+                return true;
+            }
+          }).toList();
+
           return RefreshIndicator(
             onRefresh: () async {
               ref.invalidate(attemptsProvider);
               await ref.read(attemptsProvider.future);
             },
-            child: ListView.builder(
+            child: ListView(
               padding: const EdgeInsets.all(AppSpacing.lg),
-              itemCount: attempts.length,
-              itemBuilder: (context, index) {
-                final attempt = attempts[index];
-                return _AttemptCard(
-                  attempt: attempt,
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) =>
-                            AttemptDetailScreen(attemptId: attempt.id),
+              children: [
+                _HistoryStatsHeader(attempts: attempts),
+                const SizedBox(height: AppSpacing.lg),
+                SizedBox(
+                  width: double.infinity,
+                  child: SegmentedButton<HistoryFilter>(
+                    showSelectedIcon: false,
+                    segments: [
+                      ButtonSegment(
+                        value: HistoryFilter.all,
+                        label: Text('Todos (${attempts.length})'),
                       ),
-                    );
-                  },
-                );
-              },
+                      ButtonSegment(
+                        value: HistoryFilter.approved,
+                        label: Text(
+                          'Aprobados ($approvedCount)',
+                          style: TextStyle(
+                            color: approvedCount > 0 ? AppColors.success : null,
+                            fontWeight:
+                                approvedCount > 0 ? FontWeight.bold : null,
+                          ),
+                        ),
+                      ),
+                      ButtonSegment(
+                        value: HistoryFilter.failed,
+                        label: Text(
+                          'Desaprobados ($failedCount)',
+                          style: TextStyle(
+                            color: failedCount > 0 ? AppColors.danger : null,
+                            fontWeight:
+                                failedCount > 0 ? FontWeight.bold : null,
+                          ),
+                        ),
+                      ),
+                    ],
+                    selected: {_selectedFilter},
+                    onSelectionChanged: (newSelection) {
+                      setState(() {
+                        _selectedFilter = newSelection.first;
+                      });
+                    },
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.lg),
+                if (filteredAttempts.isEmpty)
+                  CustomEmptyState(
+                    icon: _selectedFilter == HistoryFilter.approved
+                        ? Icons.emoji_events_outlined
+                        : Icons.history,
+                    title: _selectedFilter == HistoryFilter.approved
+                        ? 'Aún no tienes simulacros aprobados'
+                        : 'No hay simulacros para este filtro',
+                    subtitle: _selectedFilter == HistoryFilter.approved
+                        ? '¡Sigue practicando para alcanzar la meta de 35 aciertos!'
+                        : 'Selecciona otro filtro para revisar tus intentos.',
+                  )
+                else
+                  ...filteredAttempts.map(
+                    (attempt) => _AttemptCard(
+                      attempt: attempt,
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                AttemptDetailScreen(attemptId: attempt.id),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+              ],
             ),
           );
         },
       ),
+    );
+  }
+}
+
+class _HistoryStatsHeader extends StatelessWidget {
+  final List<Attempt> attempts;
+
+  const _HistoryStatsHeader({required this.attempts});
+
+  @override
+  Widget build(BuildContext context) {
+    final total = attempts.length;
+    final approved = attempts.where((a) => a.approved).length;
+    final rate = total > 0 ? (approved / total * 100).toStringAsFixed(0) : '0';
+    final bestScore = total > 0
+        ? attempts.map((a) => a.score).reduce((a, b) => a > b ? a : b)
+        : 0.0;
+
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(AppRadius.lg),
+        border: Border.all(color: AppColors.border),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x08000000),
+            blurRadius: 10,
+            offset: Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Row(
+            children: [
+              Icon(Icons.insights, size: 20, color: AppColors.primary),
+              SizedBox(width: AppSpacing.sm),
+              Text(
+                'Rendimiento Global',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.md),
+          const Divider(height: 1),
+          const SizedBox(height: AppSpacing.md),
+          Row(
+            children: [
+              Expanded(
+                child: _HeaderMetric(
+                  icon: Icons.quiz_outlined,
+                  color: AppColors.primary,
+                  label: 'Simulacros',
+                  value: '$total',
+                ),
+              ),
+              Expanded(
+                child: _HeaderMetric(
+                  icon: Icons.check_circle_outline,
+                  color: AppColors.success,
+                  label: 'Aprobados',
+                  value: '$approved',
+                ),
+              ),
+              Expanded(
+                child: _HeaderMetric(
+                  icon: Icons.pie_chart_outline,
+                  color: AppColors.info,
+                  label: 'Tasa de Éxito',
+                  value: '$rate%',
+                ),
+              ),
+              Expanded(
+                child: _HeaderMetric(
+                  icon: Icons.star_border_rounded,
+                  color: AppColors.warning,
+                  label: 'Mejor Nota',
+                  value: bestScore.toStringAsFixed(0),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _HeaderMetric extends StatelessWidget {
+  final IconData icon;
+  final Color color;
+  final String label;
+  final String value;
+
+  const _HeaderMetric({
+    required this.icon,
+    required this.color,
+    required this.label,
+    required this.value,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Icon(icon, size: 22, color: color),
+        const SizedBox(height: 4),
+        Text(
+          value,
+          style: TextStyle(
+            fontSize: 17,
+            fontWeight: FontWeight.bold,
+            color: color,
+          ),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          label,
+          textAlign: TextAlign.center,
+          style: const TextStyle(fontSize: 11, color: AppColors.textMuted),
+        ),
+      ],
     );
   }
 }
@@ -150,11 +353,19 @@ class _AttemptCard extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      score.toStringAsFixed(2),
+                      score.toStringAsFixed(0),
                       style: const TextStyle(
                         fontSize: 28,
                         fontWeight: FontWeight.bold,
                         color: AppColors.primary,
+                      ),
+                    ),
+                    Text(
+                      '${attempt.correctAnswers}/${attempt.totalQuestions} aciertos',
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.textMuted,
                       ),
                     ),
                   ],
