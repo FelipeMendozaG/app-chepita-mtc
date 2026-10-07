@@ -6,6 +6,8 @@ import '../providers/question_provider.dart';
 import '../theme/app_theme.dart';
 import '../widgets/buttons/secondary_button.dart';
 import '../widgets/cards/app_card.dart';
+import '../widgets/cards/question_explanation_tile.dart';
+import '../widgets/cards/question_image_widget.dart';
 import '../widgets/cards/status_badge.dart';
 import '../widgets/states/custom_empty_state.dart';
 import '../widgets/states/custom_error_state.dart';
@@ -191,6 +193,11 @@ class _QuestionCard extends StatelessWidget {
               fontWeight: FontWeight.w500,
             ),
           ),
+          if (question.imageUrl != null &&
+              question.imageUrl!.trim().isNotEmpty) ...[
+            const SizedBox(height: AppSpacing.md),
+            QuestionImageWidget(imageUrl: question.imageUrl!),
+          ],
           const SizedBox(height: AppSpacing.md),
           const Divider(height: 1),
           const SizedBox(height: AppSpacing.md),
@@ -261,6 +268,9 @@ class _QuestionCard extends StatelessWidget {
               ),
             ),
           ),
+          if (question.explanation != null &&
+              question.explanation!.trim().isNotEmpty)
+            QuestionExplanationTile(explanation: question.explanation!),
         ],
       ),
     );

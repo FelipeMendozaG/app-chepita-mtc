@@ -10,6 +10,7 @@ import '../services/question_service.dart';
 import '../theme/app_theme.dart';
 import '../widgets/buttons/primary_button.dart';
 import '../widgets/buttons/secondary_button.dart';
+import '../widgets/cards/question_image_widget.dart';
 import '../widgets/states/custom_empty_state.dart';
 import '../widgets/states/custom_error_state.dart';
 import '../widgets/states/custom_loading_state.dart';
@@ -823,40 +824,10 @@ class _QuestionStep extends StatelessWidget {
           question.topic,
           style: const TextStyle(fontSize: 13, color: AppColors.textMuted),
         ),
-        if (question.imageUrl != null && question.imageUrl!.isNotEmpty) ...[
+        if (question.imageUrl != null &&
+            question.imageUrl!.trim().isNotEmpty) ...[
           const SizedBox(height: AppSpacing.lg),
-          Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(AppRadius.md),
-              border: Border.all(color: AppColors.border),
-            ),
-            clipBehavior: Clip.antiAlias,
-            child: Image.network(
-              question.imageUrl!,
-              width: double.infinity,
-              height: 200,
-              fit: BoxFit.contain,
-              loadingBuilder: (context, child, loadingProgress) {
-                if (loadingProgress == null) return child;
-                return Container(
-                  height: 200,
-                  alignment: Alignment.center,
-                  color: AppColors.background,
-                  child: const CircularProgressIndicator(),
-                );
-              },
-              errorBuilder: (context, error, stackTrace) => Container(
-                height: 200,
-                alignment: Alignment.center,
-                color: AppColors.background,
-                child: const Icon(
-                  Icons.broken_image_outlined,
-                  size: 48,
-                  color: AppColors.textMuted,
-                ),
-              ),
-            ),
-          ),
+          QuestionImageWidget(imageUrl: question.imageUrl!),
         ],
         const SizedBox(height: AppSpacing.xl),
         ...question.options.asMap().entries.map((entry) {

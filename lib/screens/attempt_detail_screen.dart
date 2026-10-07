@@ -6,6 +6,8 @@ import '../providers/attempt_provider.dart';
 import '../theme/app_theme.dart';
 import '../utils/date_formatter.dart';
 import '../widgets/cards/app_card.dart';
+import '../widgets/cards/question_explanation_tile.dart';
+import '../widgets/cards/question_image_widget.dart';
 import '../widgets/cards/status_badge.dart';
 import '../widgets/states/custom_error_state.dart';
 import '../widgets/states/custom_loading_state.dart';
@@ -279,6 +281,11 @@ class _QuestionDetailCard extends StatelessWidget {
               question.question,
               style: const TextStyle(fontSize: 15, height: 1.4),
             ),
+            if (question.imageUrl != null &&
+                question.imageUrl!.trim().isNotEmpty) ...[
+              const SizedBox(height: AppSpacing.md),
+              QuestionImageWidget(imageUrl: question.imageUrl!),
+            ],
             const SizedBox(height: AppSpacing.lg),
             const Divider(height: 1),
             const SizedBox(height: AppSpacing.md),
@@ -304,6 +311,12 @@ class _QuestionDetailCard extends StatelessWidget {
                 ),
               );
             }),
+            if (question.explanation != null &&
+                question.explanation!.trim().isNotEmpty)
+              QuestionExplanationTile(
+                explanation: question.explanation!,
+                initiallyExpanded: !isCorrect,
+              ),
           ],
           if (question == null)
             Text(

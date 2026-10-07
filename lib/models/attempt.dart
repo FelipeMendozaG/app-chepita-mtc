@@ -55,11 +55,15 @@ class AttemptOption {
 class AttemptQuestion {
   final int id;
   final String question;
+  final String? imageUrl;
+  final String? explanation;
   final List<AttemptOption> options;
 
   const AttemptQuestion({
     required this.id,
     required this.question,
+    this.imageUrl,
+    this.explanation,
     required this.options,
   });
 
@@ -67,6 +71,8 @@ class AttemptQuestion {
     return AttemptQuestion(
       id: json['id'] as int,
       question: json['question'] ?? '',
+      imageUrl: json['image_url'] as String?,
+      explanation: json['explanation'] as String?,
       options: (json['options'] as List<dynamic>? ?? [])
           .map(
             (option) => AttemptOption.fromJson(option as Map<String, dynamic>),

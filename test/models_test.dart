@@ -107,6 +107,8 @@ void main() {
             'question': {
               'id': 4,
               'question': 'Pregunta de prueba',
+              'image_url': 'https://example.com/sign.png',
+              'explanation': 'Explicación de la regla',
               'options': [],
             },
           },
@@ -120,6 +122,14 @@ void main() {
       expect(attempt.approved, isTrue);
       expect(attempt.answers.single.option.optionText, 'Respuesta correcta');
       expect(attempt.answers.single.question?.question, 'Pregunta de prueba');
+      expect(
+        attempt.answers.single.question?.imageUrl,
+        'https://example.com/sign.png',
+      );
+      expect(
+        attempt.answers.single.question?.explanation,
+        'Explicación de la regla',
+      );
     });
 
     test('uses defaults for nullable summary values', () {
