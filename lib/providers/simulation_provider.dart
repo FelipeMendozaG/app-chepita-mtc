@@ -52,6 +52,13 @@ class SimulationNotifier extends StateNotifier<AsyncValue<List<Question>>> {
     state = AsyncValue.data(state.value ?? []);
   }
 
+  void goToQuestion(int index) {
+    if (index >= 0 && index < totalQuestions) {
+      _currentIndex = index;
+      state = AsyncValue.data(state.value ?? []);
+    }
+  }
+
   void nextQuestion() {
     if (_currentIndex < totalQuestions - 1) {
       _currentIndex++;

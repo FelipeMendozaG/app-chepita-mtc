@@ -56,6 +56,22 @@ void main() {
       expect(notifier.currentIndex, 0);
     });
 
+    test('goToQuestion navigates directly to a valid index and ignores invalid ones', () async {
+      await notifier.startSimulation();
+
+      notifier.goToQuestion(1);
+      expect(notifier.currentIndex, 1);
+
+      notifier.goToQuestion(99);
+      expect(notifier.currentIndex, 1);
+
+      notifier.goToQuestion(-1);
+      expect(notifier.currentIndex, 1);
+
+      notifier.goToQuestion(0);
+      expect(notifier.currentIndex, 0);
+    });
+
     test('reports service failures as AsyncError', () async {
       questionService.error = Exception('offline');
 
