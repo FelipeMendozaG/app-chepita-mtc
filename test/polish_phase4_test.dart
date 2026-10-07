@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:app_chepita_mtc/providers/auth_provider.dart';
 import 'package:app_chepita_mtc/screens/login_screen.dart';
+import 'package:app_chepita_mtc/screens/register_screen.dart';
 import 'package:app_chepita_mtc/widgets/buttons/primary_button.dart';
 import 'package:app_chepita_mtc/widgets/buttons/secondary_button.dart';
 import 'package:app_chepita_mtc/widgets/cards/recommendation_home_card.dart';
@@ -123,5 +124,35 @@ void main() {
     // Pump a few frames to verify animation runs without errors
     await tester.pump(const Duration(milliseconds: 300));
     await tester.pump(const Duration(milliseconds: 300));
+  });
+
+  testWidgets('RegisterScreen shows dynamic password strength indicator', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          authServiceProvider.overrideWithValue(FakeAuthService()),
+          storageServiceProvider.overrideWithValue(FakeStorageService()),
+        ],
+        child: const MaterialApp(home: RegisterScreen()),
+      ),
+    );
+
+    expect(find.text('Seguridad débil'), findsNothing);
+
+    // Password field is the 3rd TextFormField (index 2: Name, Email, Password, ConfirmPassword)
+    final fields = find.byType(TextFormField);
+    await tester.enterText(fields.at(2), '123');
+    await tester.pump();
+    expect(find.text('Seguridad débil'), findsOneWidget);
+
+    await tester.enterText(fields.at(2), 'clave123');
+    await tester.pump();
+    expect(find.text('Seguridad media'), findsOneWidget);
+
+    await tester.enterText(fields.at(2), 'ClaveSegura#2026');
+    await tester.pump();
+    expect(find.text('Seguridad fuerte'), findsOneWidget);
   });
 }

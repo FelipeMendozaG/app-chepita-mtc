@@ -70,112 +70,138 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.all(AppSpacing.xl),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Center(
-                    child: Container(
-                      height: 96,
-                      width: 96,
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        color: AppColors.infoSoftBg,
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: AppColors.primary.withValues(alpha: 0.15),
-                          width: 2,
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.lg,
+              vertical: AppSpacing.xl,
+            ),
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 440),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: AppColors.surface,
+                    borderRadius: BorderRadius.circular(AppRadius.xl),
+                    boxShadow: AppShadows.elevated,
+                    border: Border.all(color: AppColors.border),
+                  ),
+                  padding: const EdgeInsets.all(AppSpacing.xl),
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Center(
+                          child: Container(
+                            height: 90,
+                            width: 90,
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                              color: AppColors.infoSoftBg,
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: AppColors.primary.withValues(alpha: 0.15),
+                                width: 2,
+                              ),
+                              boxShadow: AppShadows.soft,
+                            ),
+                            child: const Icon(
+                              Icons.directions_car_filled,
+                              size: 48,
+                              color: AppColors.primary,
+                            ),
+                          ),
                         ),
-                        boxShadow: AppShadows.soft,
-                      ),
-                      child: const Icon(
-                        Icons.directions_car_filled,
-                        size: 50,
-                        color: AppColors.primary,
-                      ),
+                        const SizedBox(height: AppSpacing.lg),
+                        const Text(
+                          'Simulacro MTC',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 26,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: -0.5,
+                          ),
+                        ),
+                        const SizedBox(height: AppSpacing.xs),
+                        const Text(
+                          'Inicia sesión para continuar',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 15,
+                            color: AppColors.textMuted,
+                          ),
+                        ),
+                        const SizedBox(height: AppSpacing.xl),
+                        CustomTextField(
+                          controller: _emailController,
+                          focusNode: _emailFocusNode,
+                          labelText: 'Correo electrónico',
+                          prefixIcon: Icons.email_outlined,
+                          keyboardType: TextInputType.emailAddress,
+                          textInputAction: TextInputAction.next,
+                          onFieldSubmitted: (_) =>
+                              _passwordFocusNode.requestFocus(),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Ingresa tu correo electrónico';
+                            }
+                            if (!value.contains('@')) {
+                              return 'Ingresa un correo válido';
+                            }
+                            return null;
+                          },
+                        ),
+                        const SizedBox(height: AppSpacing.lg),
+                        CustomTextField(
+                          controller: _passwordController,
+                          focusNode: _passwordFocusNode,
+                          labelText: 'Contraseña',
+                          prefixIcon: Icons.lock_outline,
+                          obscureText: true,
+                          textInputAction: TextInputAction.done,
+                          onFieldSubmitted: (_) => _handleLogin(),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Ingresa tu contraseña';
+                            }
+                            if (value.length < 6) {
+                              return 'La contraseña debe tener al menos 6 caracteres';
+                            }
+                            return null;
+                          },
+                        ),
+                        const SizedBox(height: AppSpacing.xl),
+                        PrimaryButton(
+                          label: 'Iniciar Sesión',
+                          isLoading: isLoading,
+                          onPressed: _handleLogin,
+                        ),
+                        const SizedBox(height: AppSpacing.lg),
+                        Wrap(
+                          alignment: WrapAlignment.center,
+                          crossAxisAlignment: WrapCrossAlignment.center,
+                          children: [
+                            const Text('¿No tienes cuenta? '),
+                            TextButton(
+                              onPressed: isLoading
+                                  ? null
+                                  : () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) =>
+                                              const RegisterScreen(),
+                                        ),
+                                      );
+                                    },
+                              child: const Text('Regístrate'),
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
                   ),
-                  const SizedBox(height: AppSpacing.lg),
-                  const Text(
-                    'Simulacro MTC',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: AppSpacing.sm),
-                  const Text(
-                    'Inicia sesión para continuar',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 16, color: AppColors.textMuted),
-                  ),
-                  const SizedBox(height: AppSpacing.xxl),
-                  CustomTextField(
-                    controller: _emailController,
-                    focusNode: _emailFocusNode,
-                    labelText: 'Correo electrónico',
-                    prefixIcon: Icons.email_outlined,
-                    keyboardType: TextInputType.emailAddress,
-                    textInputAction: TextInputAction.next,
-                    onFieldSubmitted: (_) => _passwordFocusNode.requestFocus(),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Ingresa tu correo electrónico';
-                      }
-                      if (!value.contains('@')) {
-                        return 'Ingresa un correo válido';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: AppSpacing.lg),
-                  CustomTextField(
-                    controller: _passwordController,
-                    focusNode: _passwordFocusNode,
-                    labelText: 'Contraseña',
-                    prefixIcon: Icons.lock_outline,
-                    obscureText: true,
-                    textInputAction: TextInputAction.done,
-                    onFieldSubmitted: (_) => _handleLogin(),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Ingresa tu contraseña';
-                      }
-                      if (value.length < 6) {
-                        return 'La contraseña debe tener al menos 6 caracteres';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: AppSpacing.xl),
-                  PrimaryButton(
-                    label: 'Iniciar Sesión',
-                    isLoading: isLoading,
-                    onPressed: _handleLogin,
-                  ),
-                  const SizedBox(height: AppSpacing.lg),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Text('¿No tienes cuenta? '),
-                      TextButton(
-                        onPressed: isLoading
-                            ? null
-                            : () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) =>
-                                        const RegisterScreen(),
-                                  ),
-                                );
-                              },
-                        child: const Text('Regístrate'),
-                      ),
-                    ],
-                  ),
-                ],
+                ),
               ),
             ),
           ),
