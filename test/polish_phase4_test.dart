@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:app_chepita_mtc/models/user.dart';
 import 'package:app_chepita_mtc/providers/auth_provider.dart';
+import 'package:app_chepita_mtc/screens/home_screen.dart';
 import 'package:app_chepita_mtc/screens/login_screen.dart';
 import 'package:app_chepita_mtc/screens/register_screen.dart';
 import 'package:app_chepita_mtc/widgets/buttons/primary_button.dart';
@@ -155,4 +157,35 @@ void main() {
     await tester.pump();
     expect(find.text('Seguridad fuerte'), findsOneWidget);
   });
+
+  testWidgets('HomeScreen renders hero profile card and action badges', (
+    WidgetTester tester,
+  ) async {
+    final notifier = _FakeInitialAuthNotifier(
+      const User(id: 1, name: 'Pedro Infante', email: 'pedro@example.com'),
+    );
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          authStateProvider.overrideWith((ref) => notifier),
+        ],
+        child: const MaterialApp(home: HomeScreen()),
+      ),
+    );
+
+    expect(find.text('¡Hola, Pedro Infante!'), findsOneWidget);
+    expect(find.text('MTC • Brevete A-I'), findsOneWidget);
+    expect(find.text('40 preguntas • 40m'), findsOneWidget);
+    expect(find.text('Banco oficial'), findsOneWidget);
+    expect(find.text('Meta MTC'), findsOneWidget);
+    expect(find.text('Simulacros'), findsOneWidget);
+  });
+}
+
+class _FakeInitialAuthNotifier extends AuthNotifier {
+  _FakeInitialAuthNotifier(User initialUser)
+      : super(FakeAuthService(), FakeStorageService()) {
+    state = AsyncValue.data(initialUser);
+  }
 }
