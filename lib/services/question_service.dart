@@ -72,7 +72,6 @@ class QuestionService {
     required int attemptId,
     required Map<int, int> answers,
   }) async {
-    print(answers);
     final token = await StorageService().getToken();
     final response = await http.post(
       Uri.parse('$_baseUrl/attempts/$attemptId'),

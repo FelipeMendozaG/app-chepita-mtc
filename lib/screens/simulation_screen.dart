@@ -433,23 +433,45 @@ class _SimulationScreenState extends ConsumerState<SimulationScreen> {
                             ),
                           ),
                         ),
-                        Text(
-                          '${(notifier.progress * 100).toStringAsFixed(0)}%',
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.primary,
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 3,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppColors.infoSoftBg,
+                            borderRadius: BorderRadius.circular(AppRadius.full),
+                            border: Border.all(
+                              color: AppColors.primary.withValues(alpha: 0.2),
+                              width: 0.8,
+                            ),
+                          ),
+                          child: Text(
+                            '${(notifier.progress * 100).toStringAsFixed(0)}%',
+                            style: const TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.primary,
+                            ),
                           ),
                         ),
                       ],
                     ),
                     const SizedBox(height: AppSpacing.sm),
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
-                      child: LinearProgressIndicator(
-                        value: notifier.progress,
-                        minHeight: 8,
-                        backgroundColor: AppColors.border,
+                    TweenAnimationBuilder<double>(
+                      duration: const Duration(milliseconds: 300),
+                      curve: Curves.easeOutCubic,
+                      tween: Tween<double>(begin: 0, end: notifier.progress),
+                      builder: (context, progressVal, _) => ClipRRect(
+                        borderRadius: BorderRadius.circular(AppRadius.full),
+                        child: LinearProgressIndicator(
+                          value: progressVal,
+                          minHeight: 8,
+                          backgroundColor: AppColors.borderSubtle,
+                          valueColor: const AlwaysStoppedAnimation<Color>(
+                            AppColors.primary,
+                          ),
+                        ),
                       ),
                     ),
                   ],
@@ -562,44 +584,168 @@ class _SimulationScreenState extends ConsumerState<SimulationScreen> {
       context: context,
       builder: (dialogContext) => AlertDialog(
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppRadius.lg),
+          borderRadius: BorderRadius.circular(AppRadius.xl),
         ),
-        title: const Text('¿Finalizar simulacro?'),
+        titlePadding: const EdgeInsets.fromLTRB(
+          AppSpacing.xl,
+          AppSpacing.xl,
+          AppSpacing.xl,
+          AppSpacing.sm,
+        ),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.xl,
+          vertical: AppSpacing.sm,
+        ),
+        actionsPadding: const EdgeInsets.all(AppSpacing.lg),
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: pending > 0
+                    ? AppColors.warningSoftBg
+                    : AppColors.infoSoftBg,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                pending > 0
+                    ? Icons.help_outline_rounded
+                    : Icons.check_circle_rounded,
+                color: pending > 0 ? AppColors.warning : AppColors.primary,
+                size: 26,
+              ),
+            ),
+            const SizedBox(width: AppSpacing.md),
+            const Expanded(
+              child: Text(
+                '¿Finalizar simulacro?',
+                style: TextStyle(
+                  fontSize: 19,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
+        ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _FinishStatRow(
-              icon: Icons.check_circle,
-              color: AppColors.success,
-              label: 'Respondidas',
-              value: '${notifier.answeredCount}',
+            if (pending > 0)
+              Container(
+                margin: const EdgeInsets.only(bottom: AppSpacing.md),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 10,
+                ),
+                decoration: BoxDecoration(
+                  color: AppColors.warningSoftBg,
+                  borderRadius: BorderRadius.circular(AppRadius.md),
+                  border: Border.all(
+                    color: AppColors.warning.withValues(alpha: 0.35),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(
+                      Icons.warning_amber_rounded,
+                      color: AppColors.warning,
+                      size: 20,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Tienes $pending ${pending == 1 ? "pregunta sin responder" : "preguntas sin responder"}. Las no respondidas sumarán 0 puntos.',
+                        style: const TextStyle(
+                          fontSize: 12.5,
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xFF92400E),
+                          height: 1.3,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              )
+            else
+              Container(
+                margin: const EdgeInsets.only(bottom: AppSpacing.md),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 10,
+                ),
+                decoration: BoxDecoration(
+                  color: AppColors.successSoftBg,
+                  borderRadius: BorderRadius.circular(AppRadius.md),
+                  border: Border.all(
+                    color: AppColors.success.withValues(alpha: 0.35),
+                  ),
+                ),
+                child: const Row(
+                  children: [
+                    Icon(
+                      Icons.check_circle_outline_rounded,
+                      color: AppColors.success,
+                      size: 20,
+                    ),
+                    SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        '¡Excelente! Has respondido todas las preguntas del examen.',
+                        style: TextStyle(
+                          fontSize: 12.5,
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xFF166534),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            Container(
+              padding: const EdgeInsets.all(AppSpacing.md),
+              decoration: BoxDecoration(
+                color: AppColors.surfaceSubtle,
+                borderRadius: BorderRadius.circular(AppRadius.md),
+                border: Border.all(color: AppColors.border),
+              ),
+              child: Column(
+                children: [
+                  _FinishStatRow(
+                    icon: Icons.check_circle_rounded,
+                    color: AppColors.success,
+                    label: 'Respondidas',
+                    value:
+                        '${notifier.answeredCount} de ${notifier.totalQuestions}',
+                  ),
+                  const Divider(height: 16),
+                  _FinishStatRow(
+                    icon: Icons.radio_button_unchecked,
+                    color: AppColors.warning,
+                    label: 'Pendientes',
+                    value: '$pending',
+                  ),
+                  const Divider(height: 16),
+                  _FinishStatRow(
+                    icon: Icons.timer_outlined,
+                    color: AppColors.primary,
+                    label: 'Tiempo transcurrido',
+                    value: _formattedElapsedTime,
+                  ),
+                  const Divider(height: 16),
+                  _FinishStatRow(
+                    icon: Icons.hourglass_bottom_rounded,
+                    color: AppColors.warning,
+                    label: 'Tiempo restante',
+                    value: _formattedTime,
+                  ),
+                ],
+              ),
             ),
-            const SizedBox(height: AppSpacing.sm),
-            _FinishStatRow(
-              icon: Icons.radio_button_unchecked,
-              color: AppColors.warning,
-              label: 'Pendientes',
-              value: '$pending',
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            _FinishStatRow(
-              icon: Icons.timer,
-              color: AppColors.primary,
-              label: 'Tiempo transcurrido',
-              value: _formattedElapsedTime,
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            _FinishStatRow(
-              icon: Icons.hourglass_bottom,
-              color: AppColors.warning,
-              label: 'Tiempo restante',
-              value: _formattedTime,
-            ),
-            const SizedBox(height: AppSpacing.lg),
+            const SizedBox(height: AppSpacing.md),
             const Text(
-              'Se guardarán tus respuestas.',
-              style: TextStyle(fontSize: 13, color: AppColors.textMuted),
+              'Se guardarán tus respuestas y finalizará el examen.',
+              style: TextStyle(fontSize: 12.5, color: AppColors.textMuted),
             ),
           ],
         ),
@@ -871,30 +1017,48 @@ class _OptionTile extends StatelessWidget {
           HapticFeedback.lightImpact();
           onTap();
         },
-        borderRadius: BorderRadius.circular(AppRadius.md),
+        borderRadius: BorderRadius.circular(AppRadius.lg),
         child: AnimatedContainer(
-          duration: const Duration(milliseconds: 150),
-          padding: const EdgeInsets.all(AppSpacing.lg),
+          duration: const Duration(milliseconds: 180),
+          curve: Curves.easeInOut,
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.lg,
+            vertical: 14,
+          ),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(AppRadius.md),
+            borderRadius: BorderRadius.circular(AppRadius.lg),
             border: Border.all(
               color: isSelected ? AppColors.primary : AppColors.border,
               width: isSelected ? 2 : 1,
             ),
-            color: isSelected ? AppColors.infoSoftBg : AppColors.surface,
+            color: isSelected
+                ? AppColors.infoSoftBg.withValues(alpha: 0.7)
+                : AppColors.surface,
+            boxShadow: isSelected
+                ? [
+                    BoxShadow(
+                      color: AppColors.primary.withValues(alpha: 0.1),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ]
+                : AppShadows.soft,
           ),
           child: Row(
             children: [
               AnimatedContainer(
-                duration: const Duration(milliseconds: 150),
-                width: 28,
-                height: 28,
+                duration: const Duration(milliseconds: 180),
+                width: 32,
+                height: 32,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: isSelected ? AppColors.primary : AppColors.background,
+                  color: isSelected
+                      ? AppColors.primary
+                      : AppColors.surfaceSubtle,
                   border: Border.all(
                     color: isSelected ? AppColors.primary : AppColors.border,
+                    width: 1.2,
                   ),
                 ),
                 child: Text(
@@ -902,7 +1066,7 @@ class _OptionTile extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.bold,
-                    color: isSelected ? Colors.white : AppColors.textMuted,
+                    color: isSelected ? Colors.white : AppColors.textSecondary,
                   ),
                 ),
               ),
@@ -910,15 +1074,33 @@ class _OptionTile extends StatelessWidget {
               Expanded(
                 child: Text(
                   option.optionText,
-                  style: const TextStyle(fontSize: 15, height: 1.3),
+                  style: TextStyle(
+                    fontSize: 15,
+                    height: 1.35,
+                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                    color: isSelected
+                        ? AppColors.textPrimary
+                        : AppColors.textSecondary,
+                  ),
                 ),
               ),
-              if (isSelected)
-                const Icon(
-                  Icons.check_circle,
-                  color: AppColors.primary,
-                  size: 22,
-                ),
+              const SizedBox(width: AppSpacing.sm),
+              AnimatedSwitcher(
+                duration: const Duration(milliseconds: 180),
+                child: isSelected
+                    ? const Icon(
+                        Icons.check_circle_rounded,
+                        key: ValueKey('selected'),
+                        color: AppColors.primary,
+                        size: 22,
+                      )
+                    : Icon(
+                        Icons.radio_button_unchecked,
+                        key: const ValueKey('unselected'),
+                        color: AppColors.border.withValues(alpha: 0.9),
+                        size: 22,
+                      ),
+              ),
             ],
           ),
         ),
