@@ -86,18 +86,25 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Container(
-                    height: 96,
-                    width: 96,
-                    alignment: Alignment.center,
-                    decoration: const BoxDecoration(
-                      color: AppColors.infoSoftBg,
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(
-                      Icons.person_add_alt_1,
-                      size: 52,
-                      color: AppColors.primary,
+                  Center(
+                    child: Container(
+                      height: 96,
+                      width: 96,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: AppColors.infoSoftBg,
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: AppColors.primary.withValues(alpha: 0.15),
+                          width: 2,
+                        ),
+                        boxShadow: AppShadows.soft,
+                      ),
+                      child: const Icon(
+                        Icons.person_add_alt_1,
+                        size: 50,
+                        color: AppColors.primary,
+                      ),
                     ),
                   ),
                   const SizedBox(height: AppSpacing.lg),

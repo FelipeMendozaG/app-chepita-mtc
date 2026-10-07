@@ -27,13 +27,7 @@ class AppCard extends StatelessWidget {
         color: AppColors.surface,
         borderRadius: radius,
         border: Border.all(color: AppColors.border),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x0A000000),
-            blurRadius: 8,
-            offset: Offset(0, 2),
-          ),
-        ],
+        boxShadow: AppShadows.soft,
       ),
       child: Material(
         color: Colors.transparent,

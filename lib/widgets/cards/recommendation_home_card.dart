@@ -100,12 +100,14 @@ class _RecommendationHomeCardState extends State<RecommendationHomeCard> {
           padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(AppRadius.lg),
+            color: AppColors.surface,
+            boxShadow: AppShadows.soft,
             gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: [
-                AppColors.primary.withValues(alpha: 0.12),
-                AppColors.infoSoftBg,
+                AppColors.primary.withValues(alpha: 0.08),
+                AppColors.infoSoftBg.withValues(alpha: 0.6),
               ],
             ),
             border: Border.all(color: AppColors.primary.withValues(alpha: 0.2)),
@@ -249,6 +251,7 @@ class _RecommendationShimmerSkeletonState
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(AppRadius.lg),
         color: AppColors.surface,
+        boxShadow: AppShadows.soft,
         border: Border.all(color: AppColors.border),
       ),
       child: Row(

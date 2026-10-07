@@ -187,16 +187,18 @@ class _MenuCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(AppRadius.lg),
+        boxShadow: AppShadows.soft,
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            color.withValues(alpha: 0.12),
-            color.withValues(alpha: 0.04),
+            color.withValues(alpha: 0.09),
+            AppColors.surface,
           ],
         ),
-        border: Border.all(color: color.withValues(alpha: 0.25)),
+        border: Border.all(color: color.withValues(alpha: 0.22)),
       ),
       child: Material(
         color: Colors.transparent,
