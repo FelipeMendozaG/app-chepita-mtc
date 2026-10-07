@@ -1,0 +1,11 @@
+.gcloudignore
+.git
+.gitignore
+.dart_tool/
+.gradle/
+.idea/
+build/
+android/.gradle/
+ios/Pods/
+*.iml
+*.log
