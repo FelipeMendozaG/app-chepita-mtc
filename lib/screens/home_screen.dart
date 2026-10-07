@@ -119,7 +119,7 @@ class HomeScreen extends ConsumerWidget {
                 const SizedBox(height: AppSpacing.md),
                 _MenuCard(
                   icon: Icons.history,
-                  title: 'Mi Historial de Simulacros',
+                  title: 'Historial de Simulacros',
                   subtitle: 'Consulta tus estadísticas y resultados',
                   badgeText: totalAttempts > 0
                       ? '$totalAttempts realizados'
@@ -395,83 +395,80 @@ class _MenuCard extends StatelessWidget {
           },
           borderRadius: BorderRadius.circular(AppRadius.lg),
           child: Padding(
-            padding: const EdgeInsets.all(18),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
             child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Container(
-                  padding: const EdgeInsets.all(14),
+                  padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: color.withValues(alpha: 0.15),
+                    color: color.withValues(alpha: 0.14),
                     borderRadius: BorderRadius.circular(AppRadius.md),
                   ),
-                  child: Icon(icon, size: 28, color: color),
+                  child: Icon(icon, size: 26, color: color),
                 ),
-                const SizedBox(width: AppSpacing.lg),
+                const SizedBox(width: AppSpacing.md),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              title,
-                              style: const TextStyle(
-                                fontSize: 16.5,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                          if (badgeText != null) ...[
-                            const SizedBox(width: AppSpacing.xs),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 3,
-                              ),
-                              decoration: BoxDecoration(
-                                color: color.withValues(alpha: 0.12),
-                                borderRadius:
-                                    BorderRadius.circular(AppRadius.full),
-                                border: Border.all(
-                                  color: color.withValues(alpha: 0.25),
-                                  width: 0.8,
-                                ),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  if (badgeIcon != null) ...[
-                                    Icon(badgeIcon, size: 11, color: color),
-                                    const SizedBox(width: 3),
-                                  ],
-                                  Text(
-                                    badgeText!,
-                                    style: TextStyle(
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.w700,
-                                      color: color,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ],
+                      Text(
+                        title,
+                        style: const TextStyle(
+                          fontSize: 16.5,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: -0.2,
+                        ),
                       ),
-                      const SizedBox(height: 4),
+                      const SizedBox(height: 3),
                       Text(
                         subtitle,
                         style: const TextStyle(
                           fontSize: 13,
                           color: AppColors.textMuted,
+                          height: 1.3,
                         ),
                       ),
+                      if (badgeText != null) ...[
+                        const SizedBox(height: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 9,
+                            vertical: 3.5,
+                          ),
+                          decoration: BoxDecoration(
+                            color: color.withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(AppRadius.full),
+                            border: Border.all(
+                              color: color.withValues(alpha: 0.25),
+                              width: 0.8,
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              if (badgeIcon != null) ...[
+                                Icon(badgeIcon, size: 12, color: color),
+                                const SizedBox(width: 4),
+                              ],
+                              Text(
+                                badgeText!,
+                                style: TextStyle(
+                                  fontSize: 11.5,
+                                  fontWeight: FontWeight.w700,
+                                  color: color,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ],
                   ),
                 ),
-                const SizedBox(width: AppSpacing.sm),
-                Icon(Icons.chevron_right, color: color),
+                const SizedBox(width: AppSpacing.xs),
+                Icon(Icons.chevron_right, color: color.withValues(alpha: 0.8), size: 22),
               ],
             ),
           ),
