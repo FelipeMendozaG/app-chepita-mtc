@@ -274,18 +274,18 @@ class _HeroProfileCard extends StatelessWidget {
                   color: AppColors.primary,
                 ),
               ),
-              Container(width: 1, height: 28, color: AppColors.border),
+              Container(width: 1, height: 38, color: AppColors.border),
               Expanded(
                 child: _QuickStatItem(
                   icon: Icons.emoji_events_outlined,
-                  label: 'Mejor resultado',
+                  label: 'Mejor récord',
                   value: bestScore != null ? '$bestScore / 40' : '-- / 40',
                   color: bestScore != null && bestScore >= 35
                       ? AppColors.success
                       : AppColors.warning,
                 ),
               ),
-              Container(width: 1, height: 28, color: AppColors.border),
+              Container(width: 1, height: 38, color: AppColors.border),
               const Expanded(
                 child: _QuickStatItem(
                   icon: Icons.check_circle_outline,
@@ -318,29 +318,31 @@ class _QuickStatItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
+      mainAxisSize: MainAxisSize.min,
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, size: 13, color: color),
-            const SizedBox(width: 4),
-            Text(
-              label,
-              style: const TextStyle(
-                fontSize: 11,
-                color: AppColors.textMuted,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 2),
+        Icon(icon, size: 18, color: color),
+        const SizedBox(height: 4),
         Text(
           value,
+          textAlign: TextAlign.center,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
           style: TextStyle(
             fontSize: 12.5,
             fontWeight: FontWeight.bold,
             color: color,
+          ),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          label,
+          textAlign: TextAlign.center,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: const TextStyle(
+            fontSize: 10.5,
+            color: AppColors.textMuted,
+            fontWeight: FontWeight.w500,
           ),
         ),
       ],
