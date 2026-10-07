@@ -319,7 +319,7 @@ class _AttemptCard extends StatelessWidget {
             children: [
               const Icon(
                 Icons.calendar_today,
-                size: 16,
+                size: 15,
                 color: AppColors.textMuted,
               ),
               const SizedBox(width: 6),
@@ -327,11 +327,34 @@ class _AttemptCard extends StatelessWidget {
                 child: Text(
                   AppDateFormatter.friendly(attempt.startedAt),
                   style: const TextStyle(
-                    fontSize: 14,
+                    fontSize: 13.5,
                     color: AppColors.textMuted,
                   ),
                 ),
               ),
+              if (attempt.finishedAt != null) ...[
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(
+                      Icons.timer_outlined,
+                      size: 14,
+                      color: AppColors.textMuted,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      AppDateFormatter.duration(
+                        attempt.startedAt,
+                        attempt.finishedAt,
+                      ),
+                      style: const TextStyle(
+                        fontSize: 12.5,
+                        color: AppColors.textMuted,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ],
           ),
           const SizedBox(height: AppSpacing.md),
@@ -339,6 +362,36 @@ class _AttemptCard extends StatelessWidget {
           const SizedBox(height: AppSpacing.md),
           Row(
             children: [
+              // Mini Score Gauge circular
+              SizedBox(
+                width: 46,
+                height: 46,
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    CircularProgressIndicator(
+                      value: attempt.totalQuestions > 0
+                          ? (attempt.correctAnswers / attempt.totalQuestions)
+                              .clamp(0.0, 1.0)
+                          : 0.0,
+                      strokeWidth: 4.5,
+                      strokeCap: StrokeCap.round,
+                      backgroundColor: AppColors.borderSubtle,
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        approved ? AppColors.success : AppColors.danger,
+                      ),
+                    ),
+                    Icon(
+                      approved
+                          ? Icons.emoji_events_rounded
+                          : Icons.cancel_outlined,
+                      size: 20,
+                      color: approved ? AppColors.success : AppColors.danger,
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: AppSpacing.md),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -354,10 +407,12 @@ class _AttemptCard extends StatelessWidget {
                     ),
                     Text(
                       score.toStringAsFixed(0),
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 28,
                         fontWeight: FontWeight.bold,
-                        color: AppColors.primary,
+                        color: approved
+                            ? AppColors.success
+                            : AppColors.primary,
                       ),
                     ),
                     Text(

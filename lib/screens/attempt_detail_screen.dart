@@ -174,6 +174,14 @@ class _SummaryCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final approved = attempt.approved;
     final score = attempt.score;
+    final durationSecs =
+        (attempt.startedAt != null && attempt.finishedAt != null)
+            ? attempt.finishedAt!.difference(attempt.startedAt!).inSeconds
+            : null;
+    final avgPerQuestion =
+        (durationSecs != null && attempt.totalQuestions > 0 && durationSecs > 0)
+            ? '${(durationSecs / attempt.totalQuestions).round()}s / pregunta'
+            : 'En curso';
 
     return AppCard(
       child: Column(
@@ -196,67 +204,97 @@ class _SummaryCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 4),
-          Row(
-            children: [
-              Icon(
-                approved ? Icons.verified_outlined : Icons.info_outline,
-                size: 14,
-                color: approved ? AppColors.success : AppColors.danger,
-              ),
-              const SizedBox(width: 4),
-              Text(
-                'Nota mínima MTC: 35 de 40 preguntas',
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
-                  color: approved ? AppColors.success : AppColors.danger,
-                ),
-              ),
-            ],
+          const SizedBox(height: AppSpacing.lg),
+
+          // Medidor circular de puntaje (Score Gauge)
+          _ScoreGaugeWidget(
+            score: score,
+            correct: attempt.correctAnswers,
+            total: attempt.totalQuestions,
+            approved: approved,
           ),
           const SizedBox(height: AppSpacing.lg),
-          Row(
-            children: [
-              const Icon(
-                Icons.calendar_today,
-                size: 16,
-                color: AppColors.textMuted,
+
+          // Indicador de Nota Mínima Oficial MTC
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: BoxDecoration(
+              color: approved ? AppColors.successSoftBg : AppColors.dangerSoftBg,
+              borderRadius: BorderRadius.circular(AppRadius.md),
+              border: Border.all(
+                color: (approved ? AppColors.success : AppColors.danger)
+                    .withValues(alpha: 0.3),
               ),
-              const SizedBox(width: 6),
-              Expanded(
-                child: Text(
-                  'Inicio: ${AppDateFormatter.friendly(attempt.startedAt)}',
-                  style: const TextStyle(
-                    fontSize: 14,
-                    color: AppColors.textMuted,
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  approved ? Icons.verified_rounded : Icons.info_outline_rounded,
+                  size: 16,
+                  color: approved ? AppColors.success : AppColors.danger,
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  'Nota mínima MTC: 35 de 40 preguntas',
+                  style: TextStyle(
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.bold,
+                    color: approved
+                        ? const Color(0xFF166534)
+                        : const Color(0xFF991B1B),
                   ),
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.xs),
-          Row(
-            children: [
-              const Icon(Icons.timer, size: 16, color: AppColors.textMuted),
-              const SizedBox(width: 6),
-              Text(
-                'Duración: ${AppDateFormatter.duration(attempt.startedAt, attempt.finishedAt)}',
-                style: const TextStyle(
-                  fontSize: 14,
-                  color: AppColors.textMuted,
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
           const SizedBox(height: AppSpacing.lg),
           const Divider(height: 1),
+          const SizedBox(height: AppSpacing.md),
+
+          // Ficha técnica del intento
+          Container(
+            padding: const EdgeInsets.all(AppSpacing.md),
+            decoration: BoxDecoration(
+              color: AppColors.surfaceSubtle,
+              borderRadius: BorderRadius.circular(AppRadius.md),
+              border: Border.all(color: AppColors.border),
+            ),
+            child: Column(
+              children: [
+                _TechSheetRow(
+                  icon: Icons.calendar_today_rounded,
+                  label: 'Fecha de inicio',
+                  value: AppDateFormatter.friendly(attempt.startedAt),
+                ),
+                const SizedBox(height: 8),
+                _TechSheetRow(
+                  icon: Icons.timer_outlined,
+                  label: 'Tiempo total',
+                  value: AppDateFormatter.duration(
+                    attempt.startedAt,
+                    attempt.finishedAt,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                _TechSheetRow(
+                  icon: Icons.speed_rounded,
+                  label: 'Promedio de respuesta',
+                  value: avgPerQuestion,
+                ),
+              ],
+            ),
+          ),
           const SizedBox(height: AppSpacing.lg),
+
+          // Cuadrícula de estadísticas
           GridView.count(
             crossAxisCount: 2,
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
-            childAspectRatio: 2.2,
+            childAspectRatio: 2.3,
+            mainAxisSpacing: 10,
+            crossAxisSpacing: 10,
             children: [
               _DetailStat(
                 icon: Icons.check_circle,
@@ -286,6 +324,115 @@ class _SummaryCard extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _ScoreGaugeWidget extends StatelessWidget {
+  final double score;
+  final int correct;
+  final int total;
+  final bool approved;
+
+  const _ScoreGaugeWidget({
+    required this.score,
+    required this.correct,
+    required this.total,
+    required this.approved,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final progress = total > 0 ? (correct / total).clamp(0.0, 1.0) : 0.0;
+    final color = approved ? AppColors.success : AppColors.danger;
+
+    return Center(
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          SizedBox(
+            width: 140,
+            height: 140,
+            child: TweenAnimationBuilder<double>(
+              tween: Tween<double>(begin: 0, end: progress),
+              duration: const Duration(milliseconds: 700),
+              curve: Curves.easeOutCubic,
+              builder: (context, value, _) {
+                return CircularProgressIndicator(
+                  value: value,
+                  strokeWidth: 10,
+                  strokeCap: StrokeCap.round,
+                  backgroundColor: AppColors.borderSubtle,
+                  valueColor: AlwaysStoppedAnimation<Color>(color),
+                );
+              },
+            ),
+          ),
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                approved ? Icons.emoji_events_rounded : Icons.cancel_outlined,
+                color: color,
+                size: 26,
+              ),
+              const SizedBox(height: 2),
+              Text(
+                '${score.toStringAsFixed(0)}%',
+                style: TextStyle(
+                  fontSize: 26,
+                  fontWeight: FontWeight.bold,
+                  color: color,
+                  height: 1.1,
+                ),
+              ),
+              Text(
+                '$correct / $total aciertos',
+                style: const TextStyle(
+                  fontSize: 11.5,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textMuted,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _TechSheetRow extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final String value;
+
+  const _TechSheetRow({
+    required this.icon,
+    required this.label,
+    required this.value,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Icon(icon, size: 16, color: AppColors.primary),
+        const SizedBox(width: 8),
+        Text(
+          label,
+          style: const TextStyle(fontSize: 12.5, color: AppColors.textMuted),
+        ),
+        const Spacer(),
+        Text(
+          value,
+          style: const TextStyle(
+            fontSize: 12.5,
+            fontWeight: FontWeight.w600,
+            color: AppColors.textPrimary,
+          ),
+        ),
+      ],
     );
   }
 }
