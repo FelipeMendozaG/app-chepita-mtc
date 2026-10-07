@@ -20,6 +20,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
+  final _nameFocusNode = FocusNode();
+  final _emailFocusNode = FocusNode();
+  final _passwordFocusNode = FocusNode();
+  final _confirmPasswordFocusNode = FocusNode();
 
   @override
   void dispose() {
@@ -27,6 +31,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     _emailController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
+    _nameFocusNode.dispose();
+    _emailFocusNode.dispose();
+    _passwordFocusNode.dispose();
+    _confirmPasswordFocusNode.dispose();
     super.dispose();
   }
 
@@ -107,8 +115,11 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   const SizedBox(height: AppSpacing.xxl),
                   CustomTextField(
                     controller: _nameController,
+                    focusNode: _nameFocusNode,
                     labelText: 'Nombre completo',
                     prefixIcon: Icons.person_outline,
+                    textInputAction: TextInputAction.next,
+                    onFieldSubmitted: (_) => _emailFocusNode.requestFocus(),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'Ingresa tu nombre';
@@ -119,9 +130,12 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   const SizedBox(height: AppSpacing.lg),
                   CustomTextField(
                     controller: _emailController,
+                    focusNode: _emailFocusNode,
                     labelText: 'Correo electrónico',
                     prefixIcon: Icons.email_outlined,
                     keyboardType: TextInputType.emailAddress,
+                    textInputAction: TextInputAction.next,
+                    onFieldSubmitted: (_) => _passwordFocusNode.requestFocus(),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'Ingresa tu correo electrónico';
@@ -135,9 +149,13 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   const SizedBox(height: AppSpacing.lg),
                   CustomTextField(
                     controller: _passwordController,
+                    focusNode: _passwordFocusNode,
                     labelText: 'Contraseña',
                     prefixIcon: Icons.lock_outline,
                     obscureText: true,
+                    textInputAction: TextInputAction.next,
+                    onFieldSubmitted: (_) =>
+                        _confirmPasswordFocusNode.requestFocus(),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'Ingresa tu contraseña';
@@ -151,9 +169,12 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   const SizedBox(height: AppSpacing.lg),
                   CustomTextField(
                     controller: _confirmPasswordController,
+                    focusNode: _confirmPasswordFocusNode,
                     labelText: 'Confirmar contraseña',
                     prefixIcon: Icons.lock_outline,
                     obscureText: true,
+                    textInputAction: TextInputAction.done,
+                    onFieldSubmitted: (_) => _handleRegister(),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'Confirma tu contraseña';

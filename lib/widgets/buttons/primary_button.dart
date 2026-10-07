@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 /// Filled button with an integrated loading spinner and optional icon.
 class PrimaryButton extends StatelessWidget {
@@ -33,7 +34,12 @@ class PrimaryButton extends StatelessWidget {
             style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
           );
 
-    final effectiveOnPressed = isLoading ? null : onPressed;
+    final effectiveOnPressed = (isLoading || onPressed == null)
+        ? null
+        : () {
+            HapticFeedback.lightImpact();
+            onPressed!();
+          };
 
     if (icon != null && !isLoading) {
       return FilledButton.icon(

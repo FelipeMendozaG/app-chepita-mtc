@@ -19,11 +19,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _emailFocusNode = FocusNode();
+  final _passwordFocusNode = FocusNode();
 
   @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
+    _emailFocusNode.dispose();
+    _passwordFocusNode.dispose();
     super.dispose();
   }
 
@@ -102,9 +106,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   const SizedBox(height: AppSpacing.xxl),
                   CustomTextField(
                     controller: _emailController,
+                    focusNode: _emailFocusNode,
                     labelText: 'Correo electrónico',
                     prefixIcon: Icons.email_outlined,
                     keyboardType: TextInputType.emailAddress,
+                    textInputAction: TextInputAction.next,
+                    onFieldSubmitted: (_) => _passwordFocusNode.requestFocus(),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'Ingresa tu correo electrónico';
@@ -118,9 +125,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   const SizedBox(height: AppSpacing.lg),
                   CustomTextField(
                     controller: _passwordController,
+                    focusNode: _passwordFocusNode,
                     labelText: 'Contraseña',
                     prefixIcon: Icons.lock_outline,
                     obscureText: true,
+                    textInputAction: TextInputAction.done,
+                    onFieldSubmitted: (_) => _handleLogin(),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'Ingresa tu contraseña';

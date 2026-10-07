@@ -183,56 +183,115 @@ class _RecommendationHomeCardState extends State<RecommendationHomeCard> {
   }
 
   Widget _buildLoadingState() {
+    return const _RecommendationShimmerSkeleton();
+  }
+}
+
+class _RecommendationShimmerSkeleton extends StatefulWidget {
+  const _RecommendationShimmerSkeleton();
+
+  @override
+  State<_RecommendationShimmerSkeleton> createState() =>
+      _RecommendationShimmerSkeletonState();
+}
+
+class _RecommendationShimmerSkeletonState
+    extends State<_RecommendationShimmerSkeleton>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  late final Animation<double> _animation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1400),
+    )..repeat(reverse: true);
+    _animation = CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeInOut,
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  Widget _buildShimmerBox({
+    required double height,
+    double? width,
+    double borderRadius = AppRadius.sm,
+  }) {
+    return AnimatedBuilder(
+      animation: _animation,
+      builder: (context, child) {
+        final opacity = 0.40 + (_animation.value * 0.45);
+        return Container(
+          height: height,
+          width: width,
+          decoration: BoxDecoration(
+            color: AppColors.border.withValues(alpha: opacity),
+            borderRadius: BorderRadius.circular(borderRadius),
+          ),
+        );
+      },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      margin: const EdgeInsets.only(bottom: AppSpacing.lg),
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(AppRadius.lg),
         color: AppColors.surface,
         border: Border.all(color: AppColors.border),
       ),
-      child: const Row(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(
-            width: 64,
-            height: 64,
-            child: Center(child: CircularProgressIndicator(strokeWidth: 2.5)),
+          _buildShimmerBox(
+            width: 52,
+            height: 52,
+            borderRadius: AppRadius.md,
           ),
-          SizedBox(width: AppSpacing.lg),
+          const SizedBox(width: AppSpacing.md),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                SizedBox(
-                  height: 12,
-                  width: 120,
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      color: AppColors.border,
-                      borderRadius: BorderRadius.all(Radius.circular(8)),
-                    ),
-                  ),
+                _buildShimmerBox(
+                  width: 80,
+                  height: 10,
+                  borderRadius: 4,
                 ),
-                SizedBox(height: AppSpacing.sm),
-                SizedBox(
-                  height: 12,
+                const SizedBox(height: AppSpacing.sm),
+                _buildShimmerBox(
                   width: double.infinity,
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      color: AppColors.border,
-                      borderRadius: BorderRadius.all(Radius.circular(8)),
-                    ),
-                  ),
+                  height: 14,
+                  borderRadius: 4,
                 ),
-                SizedBox(height: AppSpacing.sm),
-                SizedBox(
-                  height: 12,
+                const SizedBox(height: AppSpacing.xs),
+                _buildShimmerBox(
                   width: 180,
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      color: AppColors.border,
-                      borderRadius: BorderRadius.all(Radius.circular(8)),
-                    ),
-                  ),
+                  height: 14,
+                  borderRadius: 4,
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                _buildShimmerBox(
+                  width: double.infinity,
+                  height: 11,
+                  borderRadius: 4,
+                ),
+                const SizedBox(height: AppSpacing.xs),
+                _buildShimmerBox(
+                  width: 140,
+                  height: 11,
+                  borderRadius: 4,
                 ),
               ],
             ),

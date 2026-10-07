@@ -9,6 +9,9 @@ class CustomTextField extends StatefulWidget {
   final TextInputType? keyboardType;
   final String? Function(String?)? validator;
   final TextInputAction? textInputAction;
+  final ValueChanged<String>? onFieldSubmitted;
+  final FocusNode? focusNode;
+  final bool enabled;
 
   const CustomTextField({
     super.key,
@@ -19,6 +22,9 @@ class CustomTextField extends StatefulWidget {
     this.keyboardType,
     this.validator,
     this.textInputAction,
+    this.onFieldSubmitted,
+    this.focusNode,
+    this.enabled = true,
   });
 
   @override
@@ -32,9 +38,12 @@ class _CustomTextFieldState extends State<CustomTextField> {
   Widget build(BuildContext context) {
     return TextFormField(
       controller: widget.controller,
+      focusNode: widget.focusNode,
+      enabled: widget.enabled,
       obscureText: _obscure,
       keyboardType: widget.keyboardType,
       textInputAction: widget.textInputAction,
+      onFieldSubmitted: widget.onFieldSubmitted,
       validator: widget.validator,
       decoration: InputDecoration(
         labelText: widget.labelText,

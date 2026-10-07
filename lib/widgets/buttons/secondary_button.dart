@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 /// Outlined button used for secondary actions ("Anterior", "Cancelar", etc.).
 class SecondaryButton extends StatelessWidget {
@@ -22,15 +23,22 @@ class SecondaryButton extends StatelessWidget {
       style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
     );
 
+    final effectiveOnPressed = onPressed == null
+        ? null
+        : () {
+            HapticFeedback.lightImpact();
+            onPressed!();
+          };
+
     if (icon != null) {
       return OutlinedButton.icon(
-        onPressed: onPressed,
+        onPressed: effectiveOnPressed,
         icon: Icon(icon),
         label: labelWidget,
         iconAlignment: iconAlignment,
       );
     }
 
-    return OutlinedButton(onPressed: onPressed, child: labelWidget);
+    return OutlinedButton(onPressed: effectiveOnPressed, child: labelWidget);
   }
 }
